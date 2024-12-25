@@ -2,6 +2,7 @@ use smolmatrix::*;
 use smolnn2::*;
 
 model! {
+    #[derive(Debug, Clone)]
     pub SimpleModel: 1, 1 => 1, 1
 
     => fcnn::Fcnn<1, 2>
@@ -26,10 +27,10 @@ fn main() {
     // model.l3.weight = matrix!(2 x 1 [1.0, 2.0]);
     // model.l3.bias = matrix!(1 x 1 [0.0]);
 
-    let mut opt_l1w = gd::GradDesc(0.001); // adam::Adam::new(0.9, 0.999, 0.0001);
-    let mut opt_l1b = gd::GradDesc(0.001); // adam::Adam::new(0.9, 0.999, 0.0001);
-    let mut opt_l3w = gd::GradDesc(0.001); // adam::Adam::new(0.9, 0.999, 0.0001);
-    let mut opt_l3b = gd::GradDesc(0.001); // adam::Adam::new(0.9, 0.999, 0.0001);
+    let mut opt_l1w = adam::Adam::new(0.9, 0.999, 0.001);
+    let mut opt_l1b = adam::Adam::new(0.9, 0.999, 0.001);
+    let mut opt_l3w = adam::Adam::new(0.9, 0.999, 0.001);
+    let mut opt_l3b = adam::Adam::new(0.9, 0.999, 0.001);
 
     loop {
         let mut c1 = fcnn::FcnnCollector::new();

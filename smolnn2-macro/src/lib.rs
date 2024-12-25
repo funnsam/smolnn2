@@ -1,6 +1,6 @@
 use proc_macro::TokenStream;
 use quote::{format_ident, quote};
-use syn::{parse::Parse, parse_macro_input, punctuated::Punctuated, Expr, Ident, Token, Type, Visibility};
+use syn::{parse::Parse, parse_macro_input, punctuated::Punctuated, Attribute, Expr, Ident, Token, Type, Visibility};
 
 /// ```
 /// smolnn2::model! {
@@ -20,7 +20,7 @@ pub fn model(input: TokenStream) -> TokenStream {
         return quote! { compiler_error!("expected at least 1 layer in a model") }.into();
     }
 
-    let Model { vis, name, input_w, input_h, output_w, output_h, layers, .. } = model;
+    let Model { attrs, vis, name, input_w, input_h, output_w, output_h, layers, .. } = model;
 
     let mut layer_tokens = quote! {};
     let mut forward = quote! {};
@@ -64,7 +64,7 @@ pub fn model(input: TokenStream) -> TokenStream {
     let d_max = format_ident!("d{}", layers.len() + 1);
     let last_layer = format_ident!("l{}", layers.len());
     quote! {
-        #[derive(Debug, Clone)]
+        #(#attrs)*
         #vis struct #name {
             #layer_tokens
         }
@@ -100,6 +100,7 @@ pub fn model(input: TokenStream) -> TokenStream {
 }
 
 struct Model {
+    attrs: Vec<Attribute>,
     vis: Visibility,
     name: Ident,
     #[allow(unused)]
@@ -122,6 +123,7 @@ struct Model {
 impl Parse for Model {
     fn parse(input: syn::parse::ParseStream) -> syn::Result<Self> {
         Ok(Self {
+            attrs: input.call(Attribute::parse_outer)?,
             vis: input.parse()?,
             name: input.parse()?,
             colon: input.parse()?,

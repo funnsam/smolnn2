@@ -2,6 +2,7 @@ use smolmatrix::*;
 use smolnn2::*;
 
 model! {
+    #[derive(Debug, Clone)]
     pub LinearModel: 1, 1 => 1, 1
 
     => fcnn::Fcnn<1, 1>
