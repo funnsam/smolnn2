@@ -33,6 +33,7 @@ impl<const I: usize, const O: usize> Layer<1, I, 1, O> for Fcnn<I, O> {
     fn derivative(
         &self,
         dc: &Matrix<1, O>,
+        _input: &Matrix<1, I>,
     ) -> Matrix<1, I> {
         &self.weight.transpose() * &dc
     }

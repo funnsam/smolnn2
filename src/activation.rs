@@ -14,8 +14,9 @@ macro_rules! activation {
             fn derivative(
                 &self,
                 dc: &Matrix<W, H>,
+                input: &Matrix<W, H>,
             ) -> Matrix<W, H> {
-                dc.clone().map_each(|i| *i = $der(self, *i))
+                dc.clone().map_zip_ref(input, |(i, input)| *i *= $der(self, *input))
             }
 
             fn back_propagate(

@@ -17,6 +17,7 @@ pub trait Layer<const IW: usize, const IH: usize, const OW: usize, const OH: usi
     fn derivative(
         &self,
         dc: &Matrix<OW, OH>,
+        input: &Matrix<IW, IH>,
     ) -> Matrix<IW, IH>;
 
     fn back_propagate(

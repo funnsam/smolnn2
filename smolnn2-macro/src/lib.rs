@@ -54,9 +54,10 @@ pub fn model(input: TokenStream) -> TokenStream {
         let d_this = format_ident!("d{}", i + 1);
         let d_last = format_ident!("d{}", i + 2);
         let layer = format_ident!("l{}", i + 1);
+        let input = format_ident!("l{i}");
 
         derivatives.extend(quote! {
-            let #d_this = self.#layer.derivative(&#d_last);
+            let #d_this = self.#layer.derivative(&#d_last, &#input);
         });
     }
 
