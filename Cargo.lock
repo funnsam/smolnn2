@@ -36,10 +36,33 @@ dependencies = [
 ]
 
 [[package]]
-name = "smolmatrix"
-version = "0.1.8"
+name = "serde"
+version = "1.0.216"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "aa96646b53f128a0d093b853b5f3ee5401774a4bdc32fd06b43233b5740a0a8c"
+checksum = "0b9781016e935a97e8beecf0c933758c97a5520d32930e460142b4cd80c6338e"
+dependencies = [
+ "serde_derive",
+]
+
+[[package]]
+name = "serde_derive"
+version = "1.0.216"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "46f859dbbf73865c6627ed570e78961cd3ac92407a2d117204c49232485da55e"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
+name = "smolmatrix"
+version = "0.1.9"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b388496e7d1e2d03a5dde82b6138bccd4df073717d1ebe56ba02fa6f5a969960"
+dependencies = [
+ "serde",
+]
 
 [[package]]
 name = "smolnn2"

@@ -6,7 +6,7 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-smolmatrix = "0.1.8"
+smolmatrix = "0.1.9"
 smolnn2-macro = { version = "0.1.0", path = "smolnn2-macro", optional = true }
 
 [dev-dependencies]
