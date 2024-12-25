@@ -49,3 +49,37 @@ activation!(Tanh
     |_, i: f32| i.tanh(),
     |_, i: f32| i.cosh().powi(2).recip()
 );
+
+/// Performs the softmax algorithm on it's inputs. When training, you **must** use the Categorical
+/// Cross Entropy loss function instead.
+#[derive(Debug, Clone)]
+pub struct Softmax;
+
+impl Collectable for Softmax {
+    type Collector = ();
+    }
+
+impl<const W: usize, const H: usize> Layer<W, H, W, H> for Softmax {
+    fn forward(&self, input: &Matrix<W, H>) -> Matrix<W, H> {
+        let mut input = input.clone();
+        let max = input.inner.iter().flatten().fold(f32::NEG_INFINITY, |c, i| c.max(*i));
+        input.map_each_in_place(|i| *i = (*i - max).exp());
+        let sum = input.inner.iter().flatten().sum::<f32>();
+        input / sum
+    }
+
+    fn derivative(
+        &self,
+        dc: &Matrix<W, H>,
+        _input: &Matrix<W, H>,
+    ) -> Matrix<W, H> {
+        dc.clone()
+    }
+
+    fn back_propagate(
+        &self,
+        _collector: &mut Self::Collector,
+        _derivative: Matrix<W, H>,
+        _input: &Matrix<W, H>,
+    ) {}
+}

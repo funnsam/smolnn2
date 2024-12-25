@@ -6,6 +6,9 @@ pub mod fcnn;
 pub mod adam;
 pub mod gd;
 
+// misc
+pub mod loss;
+
 use smolmatrix::*;
 
 #[cfg(feature = "macro")]
@@ -34,18 +37,4 @@ pub trait Collectable {
 
 pub trait Optimizer<const W: usize, const H: usize> {
     fn update(&mut self, w: &mut Matrix<W, H>, g: Matrix<W, H>);
-}
-
-pub fn squared_error<const W: usize, const H: usize>(
-    result: Matrix<W, H>,
-    expected: &Matrix<W, H>,
-) -> Matrix<W, H> {
-    (result - expected).map_each(|i| *i *= *i)
-}
-
-pub fn squared_error_derivative<const W: usize, const H: usize>(
-    result: Matrix<W, H>,
-    expected: &Matrix<W, H>,
-) -> Matrix<W, H> {
-    (result - expected) * 2.0
 }

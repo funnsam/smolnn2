@@ -27,10 +27,10 @@ fn main() {
     // model.l3.weight = matrix!(2 x 1 [1.0, 2.0]);
     // model.l3.bias = matrix!(1 x 1 [0.0]);
 
-    let mut opt_l1w = adam::Adam::new(0.9, 0.999, 0.001);
-    let mut opt_l1b = adam::Adam::new(0.9, 0.999, 0.001);
-    let mut opt_l3w = adam::Adam::new(0.9, 0.999, 0.001);
-    let mut opt_l3b = adam::Adam::new(0.9, 0.999, 0.001);
+    let mut opt_l1w = adam::Adam::new(0.9, 0.999, 0.1);
+    let mut opt_l1b = adam::Adam::new(0.9, 0.999, 0.1);
+    let mut opt_l3w = adam::Adam::new(0.9, 0.999, 0.1);
+    let mut opt_l3b = adam::Adam::new(0.9, 0.999, 0.1);
 
     loop {
         let mut c1 = fcnn::FcnnCollector::new();
@@ -38,8 +38,8 @@ fn main() {
         let mut err = 0.0;
 
         for (i, o) in data.iter() {
-            let out = model.back_propagate(i, o, &mut c1, &mut (), &mut c3);
-            err += squared_error(out, o)[0];
+            let out = model.back_propagate(i, o, loss::squared_error_derivative, &mut c1, &mut (), &mut c3);
+            err += loss::squared_error(out, o)[0];
         }
 
         opt_l1w.update(&mut model.l1.weight, c1.weight / data.len() as f32);
@@ -48,7 +48,6 @@ fn main() {
         opt_l3b.update(&mut model.l3.bias  , c3.bias   / data.len() as f32);
 
         println!("error: {}", err / data.len() as f32);
-        println!("{model:?}");
     }
 }
 

@@ -79,16 +79,22 @@ pub fn model(input: TokenStream) -> TokenStream {
                 #last_layer
             }
 
-            pub fn back_propagate(
+            pub fn back_propagate<
+                ED: Fn(
+                    ::smolmatrix::Matrix<#output_w, #output_h>,
+                    &::smolmatrix::Matrix<#output_w, #output_h>,
+                ) -> ::smolmatrix::Matrix<#output_w, #output_h>
+            >(
                 &self,
                 input: &::smolmatrix::Matrix<#input_w, #input_h>,
                 expected: &::smolmatrix::Matrix<#output_w, #output_h>,
+                error_derivative: ED,
                 #collectors
             ) -> ::smolmatrix::Matrix<#output_w, #output_h> {
                 let l0 = input;
                 #forward
 
-                let #d_max = squared_error_derivative(#last_layer.clone(), expected);
+                let #d_max = error_derivative(#last_layer.clone(), expected);
                 #derivatives
 
                 #back_propagate
