@@ -1,5 +1,5 @@
 [workspace]
-members = ["smolnn2-macro"]
+members = ["mnist", "smolnn2-macro"]
 [package]
 name = "smolnn2"
 version = "0.1.0"
