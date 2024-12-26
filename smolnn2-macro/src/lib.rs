@@ -27,10 +27,10 @@ pub fn model(input: TokenStream) -> TokenStream {
     let mut collectors = quote! {};
     let mut back_propagate = quote! {};
 
-    for (i, Layer { is_activation, ty: l }) in layers.iter().enumerate() {
+    for (i, Layer { is_activation, vis, ty: l }) in layers.iter().enumerate() {
         let name = format_ident!("l{}", i + 1);
         layer_tokens.extend(quote! {
-            #name: #l,
+            #vis #name: #l,
         });
 
         let prev = format_ident!("l{i}");
@@ -150,6 +150,7 @@ impl Parse for Model {
 
 struct Layer {
     is_activation: bool,
+    vis: Visibility,
     ty: Type,
 }
 
@@ -168,6 +169,7 @@ impl Parse for Layer {
 
         Ok(Self {
             is_activation,
+            vis: input.parse()?,
             ty: input.parse()?,
         })
     }
