@@ -42,7 +42,7 @@ impl<const I: usize, const O: usize> Fcnn<I, O> {
     /// Get uniform distributed random `f32`s in the range 0..1 and return a fully connected neural
     /// network layer with He uniform initialization
     pub fn new_he_uniform<F: Fn() -> f32>(f: F) -> Self {
-        let r = (6.0_f32 / I as f32).sqrt();
+        let r = (3.0_f32 / I as f32).sqrt();
 
         Self {
             weight: Matrix::new_zeroed().map_each(|i| *i = f() * 2.0 * r - r),
