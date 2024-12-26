@@ -1,11 +1,12 @@
 [workspace]
-members = ["mnist", "smolnn2-macro"]
+members = ["smolnn2-macro"]
 [package]
 name = "smolnn2"
 version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+serde = { version = "1.0.216", features = ["derive"], optional = true }
 smolmatrix = "0.1.9"
 smolnn2-macro = { version = "0.1.0", path = "smolnn2-macro", optional = true }
 
@@ -14,3 +15,4 @@ fastrand = "2.3.0"
 
 [features]
 macro = ["dep:smolnn2-macro"]
+serde = ["dep:serde", "smolmatrix/serde"]

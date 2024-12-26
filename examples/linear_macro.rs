@@ -16,22 +16,20 @@ fn main() {
     }
 
     let mut model = LinearModel {
-        l1: fcnn::Fcnn::new(|| fastrand::f32() * 0.5),
+        l1: fcnn::Fcnn::new_xavier_uniform(fastrand::f32),
     };
-    let mut opt_l1w = adam::Adam::new(0.9, 0.999, 1.0);
-    let mut opt_l1b = adam::Adam::new(0.9, 0.999, 1.0);
+    let mut o1 = fcnn::make_optimizers!(adam::Adam::new(0.9, 0.999, 0.01));
 
     loop {
         let mut c1 = fcnn::FcnnCollector::new();
         let mut err = 0.0;
 
         for (i, o) in data.iter() {
-            let out = model.back_propagate(i, o, &mut c1);
+            let out = model.back_propagate(i, o, loss::squared_error_derivative, &mut c1);
             err += loss::squared_error(out, o)[0];
         }
 
-        opt_l1w.update(&mut model.l1.weight, c1.weight / data.len() as f32);
-        opt_l1b.update(&mut model.l1.bias  , c1.bias   / data.len() as f32);
+        model.l1.update(c1, data.len(), &mut o1);
 
         println!("error: {}", err / data.len() as f32);
     }

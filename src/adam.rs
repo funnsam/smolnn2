@@ -1,5 +1,6 @@
 use crate::*;
 
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Adam<const W: usize, const H: usize> {
     pub beta_1: f32,
     pub beta_2: f32,

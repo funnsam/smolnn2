@@ -1,6 +1,6 @@
 use proc_macro::TokenStream;
 use quote::{format_ident, quote};
-use syn::{parse::Parse, parse_macro_input, punctuated::Punctuated, Attribute, Expr, Ident, Token, Type, Visibility};
+use syn::{parse::Parse, parse_macro_input, parse_str, punctuated::Punctuated, Attribute, Expr, Ident, Meta, Path, Token, Type, Visibility};
 
 /// ```
 /// smolnn2::model! {
@@ -27,7 +27,7 @@ pub fn model(input: TokenStream) -> TokenStream {
     let mut collectors = quote! {};
     let mut back_propagate = quote! {};
 
-    for (i, l) in layers.iter().enumerate() {
+    for (i, Layer { is_activation, ty: l }) in layers.iter().enumerate() {
         let name = format_ident!("l{}", i + 1);
         layer_tokens.extend(quote! {
             #name: #l,
@@ -38,15 +38,17 @@ pub fn model(input: TokenStream) -> TokenStream {
             let #name = self.#name.forward(&#prev);
         });
 
-        let collector = format_ident!("c{}", i + 1);
-        collectors.extend(quote! {
-            #collector: &mut <#l as ::smolnn2::Collectable>::Collector,
-        });
+        if !*is_activation {
+            let collector = format_ident!("c{}", i + 1);
+            collectors.extend(quote! {
+                #collector: &mut <#l as ::smolnn2::Collectable>::Collector,
+            });
 
-        let d_next = format_ident!("d{}", i + 2);
-        back_propagate.extend(quote! {
-            self.#name.back_propagate(#collector, #d_next, &#prev);
-        });
+            let d_next = format_ident!("d{}", i + 2);
+            back_propagate.extend(quote! {
+                self.#name.back_propagate(#collector, #d_next, &#prev);
+            });
+        }
     }
 
     let mut derivatives = quote! {};
@@ -146,4 +148,27 @@ impl Parse for Model {
     }
 }
 
-type Layer = Type;
+struct Layer {
+    is_activation: bool,
+    ty: Type,
+}
+
+impl Parse for Layer {
+    fn parse(input: syn::parse::ParseStream) -> syn::Result<Self> {
+        let mut is_activation = false;
+
+        for attr in Attribute::parse_outer(input)? {
+            match attr.meta {
+                Meta::Path(path) if parse_str::<Path>("activation").unwrap() == path => {
+                    is_activation = true;
+                },
+                _ => return Err(input.error("unknown attr")),
+            }
+        }
+
+        Ok(Self {
+            is_activation,
+            ty: input.parse()?,
+        })
+    }
+}

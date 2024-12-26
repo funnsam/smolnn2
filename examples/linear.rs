@@ -8,25 +8,23 @@ fn main() {
         data.push((vector!(1 [x]), gen_data(x)));
     }
 
-    let mut l0 = fcnn::Fcnn::<1, 1>::new(|| fastrand::f32() * 0.5);
-    let mut opt_l0w = adam::Adam::new(0.9, 0.999, 1.0);
-    let mut opt_l0b = adam::Adam::new(0.9, 0.999, 1.0);
+    let mut l1 = fcnn::Fcnn::new_xavier_uniform(fastrand::f32);
+    let mut o1 = fcnn::make_optimizers!(adam::Adam::new(0.9, 0.999, 0.01));
 
     loop {
-        let mut c0 = fcnn::FcnnCollector::new();
+        let mut c1 = fcnn::FcnnCollector::new();
         let mut err = 0.0;
 
         for (i, o) in data.iter() {
-            let o0 = l0.forward(i);
+            let o1 = l1.forward(i);
 
-            let d_err = loss::squared_error_derivative(o0.clone(), o);
-            err += loss::squared_error(o0, o)[0];
+            let d_err = loss::squared_error_derivative(o1.clone(), o);
+            err += loss::squared_error(o1, o)[0];
 
-            l0.back_propagate(&mut c0, d_err, i);
+            l1.back_propagate(&mut c1, d_err, i);
         }
 
-        opt_l0w.update(&mut l0.weight, c0.weight / data.len() as f32);
-        opt_l0b.update(&mut l0.bias  , c0.bias   / data.len() as f32);
+        l1.update(c1, data.len(), &mut o1);
 
         println!("error: {}", err / data.len() as f32);
     }

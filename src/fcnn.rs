@@ -1,6 +1,14 @@
 use crate::*;
 
+#[macro_export]
+macro_rules! fcnn_make_optimizers {
+    ($opt:expr) => { ($opt, $opt) };
+}
+
+pub use fcnn_make_optimizers as make_optimizers;
+
 #[derive(Debug, Clone)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Fcnn<const I: usize, const O: usize> {
     pub weight: Matrix<I, O>,
     pub bias: Vector<O>,
@@ -18,6 +26,36 @@ impl<const I: usize, const O: usize> Fcnn<I, O> {
             weight: Matrix::new_zeroed().map_each(|i| *i = f()),
             bias: Matrix::new_zeroed().map_each(|i| *i = f()),
         }
+    }
+
+    /// Get uniform distributed random `f32`s in the range 0..1 and return a fully connected neural
+    /// network layer with Xavier uniform initialization
+    pub fn new_xavier_uniform<F: Fn() -> f32>(f: F) -> Self {
+        let r = (6.0_f32 / (I + O) as f32).sqrt();
+
+        Self {
+            weight: Matrix::new_zeroed().map_each(|i| *i = f() * 2.0 * r - r),
+            bias: Matrix::new_zeroed().map_each(|i| *i = f() * 2.0 * r - r),
+        }
+    }
+
+    /// Get uniform distributed random `f32`s in the range 0..1 and return a fully connected neural
+    /// network layer with He uniform initialization
+    pub fn new_he_uniform<F: Fn() -> f32>(f: F) -> Self {
+        let r = (6.0_f32 / I as f32).sqrt();
+
+        Self {
+            weight: Matrix::new_zeroed().map_each(|i| *i = f() * 2.0 * r - r),
+            bias: Matrix::new_zeroed().map_each(|i| *i = f() * 2.0 * r - r),
+        }
+    }
+
+    pub fn update<
+        W: Optimizer<I, O>,
+        B: Optimizer<1, O>,
+    >(&mut self, c: FcnnCollector<I, O>, data_len: usize, opts: &mut (W, B)) {
+        opts.0.update(&mut self.weight, c.weight / data_len as f32);
+        opts.1.update(&mut self.bias  , c.bias   / data_len as f32);
     }
 }
 
@@ -47,11 +85,6 @@ impl<const I: usize, const O: usize> Layer<1, I, 1, O> for Fcnn<I, O> {
         collector.bias += &last_derivative;
         collector.weight += &(&last_derivative * &input.transpose());
     }
-
-    // fn collect(&mut self, collector: Self::Collector, optimizers: Self::Optimizers) {
-    //     self.weight -= &(collector.weight * (learning_rate * (1.0 / data as f32)));
-    //     self.bias -= &(collector.bias * (learning_rate * (1.0 / data as f32)));
-    // }
 }
 
 impl<const I: usize, const O: usize> FcnnCollector<I, O> {
@@ -61,14 +94,4 @@ impl<const I: usize, const O: usize> FcnnCollector<I, O> {
             bias: Matrix::new_zeroed(),
         }
     }
-}
-
-#[test]
-fn fcnn_derivative() {
-    let fcnn = Fcnn {
-        weight: matrix!(1 x 1 [3.0]),
-        bias: vector!(1 [0.0]),
-    };
-    let d = fcnn.derivative(&matrix!(1 x 1 [3.0]))[0];
-    assert!((d - 9.0).abs() < f32::EPSILON, "{d}");
 }

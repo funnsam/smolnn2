@@ -30,6 +30,7 @@ macro_rules! activation {
 }
 
 #[derive(Debug, Clone)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct ClippedRelu;
 activation!(ClippedRelu
     |_, i: f32| i.min(1.0).max(0.0),
@@ -37,6 +38,7 @@ activation!(ClippedRelu
 );
 
 #[derive(Debug, Clone)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct LeakyRelu(pub f32);
 activation!(LeakyRelu
     |s: &Self, i: f32| i.max(s.0 * i),
@@ -44,6 +46,7 @@ activation!(LeakyRelu
 );
 
 #[derive(Debug, Clone)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Tanh;
 activation!(Tanh
     |_, i: f32| i.tanh(),
@@ -53,6 +56,7 @@ activation!(Tanh
 /// Performs the softmax algorithm on it's inputs. When training, you **must** use the Categorical
 /// Cross Entropy loss function instead.
 #[derive(Debug, Clone)]
+#[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Softmax;
 
 impl Collectable for Softmax {

@@ -18,19 +18,17 @@ fn main() {
     }
 
     let mut model = SimpleModel {
-        l1: fcnn::Fcnn::new(|| fastrand::f32() * 0.5),
+        l1: fcnn::Fcnn::new_xavier_uniform(fastrand::f32),
         l2: activation::Tanh,
-        l3: fcnn::Fcnn::new(|| fastrand::f32() * 0.5),
+        l3: fcnn::Fcnn::new_xavier_uniform(fastrand::f32),
     };
     // model.l1.weight = matrix!(1 x 2 [3.0] [5.0]);
     // model.l1.bias = matrix!(1 x 2 [-1.0] [2.0]);
     // model.l3.weight = matrix!(2 x 1 [1.0, 2.0]);
     // model.l3.bias = matrix!(1 x 1 [0.0]);
 
-    let mut opt_l1w = adam::Adam::new(0.9, 0.999, 0.1);
-    let mut opt_l1b = adam::Adam::new(0.9, 0.999, 0.1);
-    let mut opt_l3w = adam::Adam::new(0.9, 0.999, 0.1);
-    let mut opt_l3b = adam::Adam::new(0.9, 0.999, 0.1);
+    let mut o1 = fcnn::make_optimizers!(adam::Adam::new(0.9, 0.999, 0.01));
+    let mut o3 = fcnn::make_optimizers!(adam::Adam::new(0.9, 0.999, 0.01));
 
     loop {
         let mut c1 = fcnn::FcnnCollector::new();
@@ -42,10 +40,8 @@ fn main() {
             err += loss::squared_error(out, o)[0];
         }
 
-        opt_l1w.update(&mut model.l1.weight, c1.weight / data.len() as f32);
-        opt_l1b.update(&mut model.l1.bias  , c1.bias   / data.len() as f32);
-        opt_l3w.update(&mut model.l3.weight, c3.weight / data.len() as f32);
-        opt_l3b.update(&mut model.l3.bias  , c3.bias   / data.len() as f32);
+        model.l1.update(c1, data.len(), &mut o1);
+        model.l3.update(c3, data.len(), &mut o3);
 
         println!("error: {}", err / data.len() as f32);
     }

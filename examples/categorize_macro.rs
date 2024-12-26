@@ -19,15 +19,13 @@ fn main() {
     }
 
     let mut model = CategorizeModel {
-        l1: fcnn::Fcnn::new(|| fastrand::f32() * 0.5),
+        l1: fcnn::Fcnn::new_xavier_uniform(fastrand::f32),
         l2: activation::Tanh,
-        l3: fcnn::Fcnn::new(|| fastrand::f32() * 0.5),
+        l3: fcnn::Fcnn::new_xavier_uniform(fastrand::f32),
         l4: activation::Softmax,
     };
-    let mut opt_l1w = adam::Adam::new(0.9, 0.999, 1.0);
-    let mut opt_l1b = adam::Adam::new(0.9, 0.999, 1.0);
-    let mut opt_l3w = adam::Adam::new(0.9, 0.999, 1.0);
-    let mut opt_l3b = adam::Adam::new(0.9, 0.999, 1.0);
+    let mut o1 = fcnn::make_optimizers!(adam::Adam::new(0.9, 0.999, 0.001));
+    let mut o3 = fcnn::make_optimizers!(adam::Adam::new(0.9, 0.999, 0.001));
 
     loop {
         let mut c1 = fcnn::FcnnCollector::new();
@@ -39,10 +37,8 @@ fn main() {
             err += loss::squared_error(out, o)[0];
         }
 
-        opt_l1w.update(&mut model.l1.weight, c1.weight / data.len() as f32);
-        opt_l1b.update(&mut model.l1.bias  , c1.bias   / data.len() as f32);
-        opt_l3w.update(&mut model.l3.weight, c3.weight / data.len() as f32);
-        opt_l3b.update(&mut model.l3.bias  , c3.bias   / data.len() as f32);
+        model.l1.update(c1, data.len(), &mut o1);
+        model.l3.update(c3, data.len(), &mut o3);
 
         println!("error: {}", err / data.len() as f32);
     }
