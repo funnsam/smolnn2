@@ -42,3 +42,9 @@ impl<T: Collectable> Collectable for Box<T> {
 pub trait Optimizer<const W: usize, const H: usize> {
     fn update(&mut self, w: &mut Matrix<W, H>, g: Matrix<W, H>);
 }
+
+impl<T: Optimizer<W, H>, const W: usize, const H: usize> Optimizer<W, H> for Box<T> {
+    fn update(&mut self, w: &mut Matrix<W, H>, g: Matrix<W, H>) {
+        (**self).update(w, g);
+    }
+}

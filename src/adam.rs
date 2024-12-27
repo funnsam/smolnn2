@@ -30,10 +30,10 @@ impl<const W: usize, const H: usize> Optimizer<W, H> for Adam<W, H> {
         self.v *= self.beta_2;
         self.v += &(g.map_each(|i| *i *= *i) * (1.0 - self.beta_2));
 
-        let m_hat = self.m.clone() / (1.0 - self.beta_1.powi(self.t as _));
-        let v_hat = self.v.clone() / (1.0 - self.beta_2.powi(self.t as _));
+        let m_hat = 1.0 - self.beta_1.powi(self.t as _);
+        let v_hat = 1.0 - self.beta_2.powi(self.t as _);
 
-        *w -= &m_hat.map_zip_ref(&v_hat, |(m, v)| *m = *m / (v.sqrt() + f32::EPSILON) * self.eta);
+        *w -= &self.m.clone().map_zip_ref(&self.v, |(m, v)| *m = (*m / m_hat) / ((v / v_hat).sqrt() + f32::EPSILON) * self.eta);
 
         self.t += 1;
     }

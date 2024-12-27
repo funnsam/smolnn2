@@ -53,9 +53,9 @@ impl<const I: usize, const O: usize> Fcnn<I, O> {
     pub fn update<
         W: Optimizer<I, O>,
         B: Optimizer<1, O>,
-    >(&mut self, c: FcnnCollector<I, O>, data_len: usize, opts: &mut (W, B)) {
-        opts.0.update(&mut self.weight, c.weight / data_len as f32);
-        opts.1.update(&mut self.bias  , c.bias   / data_len as f32);
+    >(&mut self, c: &FcnnCollector<I, O>, opts: &mut (W, B)) {
+        opts.0.update(&mut self.weight, c.weight.clone());
+        opts.1.update(&mut self.bias  , c.bias  .clone());
     }
 }
 
@@ -93,5 +93,17 @@ impl<const I: usize, const O: usize> FcnnCollector<I, O> {
             weight: Matrix::new_zeroed(),
             bias: Matrix::new_zeroed(),
         }
+    }
+
+    pub fn reset(&mut self) {
+        self.weight.inner.fill([0.0; I]);
+        self.bias.inner.fill([0.0]);
+    }
+}
+
+impl<const I: usize, const O: usize> core::ops::DivAssign<f32> for FcnnCollector<I, O> {
+    fn div_assign(&mut self, rhs: f32) {
+        self.weight /= rhs;
+        self.bias /= rhs;
     }
 }
