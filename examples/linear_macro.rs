@@ -19,9 +19,10 @@ fn main() {
         l1: fcnn::Fcnn::new_xavier_uniform(fastrand::f32),
     };
     let mut o1 = fcnn::make_optimizers!(adam::Adam::new(0.9, 0.999, 0.01));
+    let mut c1 = fcnn::FcnnCollector::new();
 
     loop {
-        let mut c1 = fcnn::FcnnCollector::new();
+        c1.reset();
         let mut err = 0.0;
 
         for (i, o) in data.iter() {
@@ -29,7 +30,8 @@ fn main() {
             err += loss::squared_error(out, o)[0];
         }
 
-        model.l1.update(c1, data.len(), &mut o1);
+        c1 /= data.len() as f32;
+        model.l1.update(&c1, &mut o1);
 
         println!("error: {}", err / data.len() as f32);
     }

@@ -30,9 +30,12 @@ fn main() {
     let mut o1 = fcnn::make_optimizers!(adam::Adam::new(0.9, 0.999, 0.01));
     let mut o3 = fcnn::make_optimizers!(adam::Adam::new(0.9, 0.999, 0.01));
 
+    let mut c1 = fcnn::FcnnCollector::new();
+    let mut c3 = fcnn::FcnnCollector::new();
+
     loop {
-        let mut c1 = fcnn::FcnnCollector::new();
-        let mut c3 = fcnn::FcnnCollector::new();
+        c1.reset();
+        c3.reset();
         let mut err = 0.0;
 
         for (i, o) in data.iter() {
@@ -40,8 +43,10 @@ fn main() {
             err += loss::squared_error(out, o)[0];
         }
 
-        model.l1.update(c1, data.len(), &mut o1);
-        model.l3.update(c3, data.len(), &mut o3);
+        c1 /= data.len() as f32;
+        model.l1.update(&c1, &mut o1);
+        c3 /= data.len() as f32;
+        model.l3.update(&c3, &mut o3);
 
         println!("error: {}", err / data.len() as f32);
     }
