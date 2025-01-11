@@ -31,14 +31,16 @@ macro_rules! activation {
 
 #[derive(Debug, Clone)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
-pub struct ClippedRelu;
+/// Clipped ReLU activation function (`min(max(x, 0), self.0)`)
+pub struct ClippedRelu(f32);
 activation!(ClippedRelu
-    |_, i: f32| i.min(1.0).max(0.0),
-    |_, i: f32| if 0.0 < i && i < 1.0 { 1.0 } else { 0.0 }
+    |s: &Self, i: f32| i.min(s.0).max(0.0),
+    |s: &Self, i: f32| if 0.0 < i && i < s.0 { 1.0 } else { 0.0 }
 );
 
 #[derive(Debug, Clone)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+/// Leaky ReLU activation function for `0 <= self.0 <= 1` (`max(x, self.0 * x)`)
 pub struct LeakyRelu(pub f32);
 activation!(LeakyRelu
     |s: &Self, i: f32| i.max(s.0 * i),
@@ -47,14 +49,14 @@ activation!(LeakyRelu
 
 #[derive(Debug, Clone)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+/// `tanh` activation function
 pub struct Tanh;
 activation!(Tanh
     |_, i: f32| i.tanh(),
     |_, i: f32| i.cosh().powi(2).recip()
 );
 
-/// Performs the softmax algorithm on it's inputs. When training, you **must** use the Categorical
-/// Cross Entropy loss function instead.
+/// Normalized softmax activation function
 #[derive(Debug, Clone)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
 pub struct Softmax;

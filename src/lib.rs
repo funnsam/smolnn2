@@ -15,6 +15,7 @@ use smolmatrix::*;
 pub use smolnn2_macro::model;
 
 pub trait Layer<const IW: usize, const IH: usize, const OW: usize, const OH: usize>: Collectable {
+    /// Does forward propagation
     fn forward(&self, input: &Matrix<IW, IH>) -> Matrix<OW, OH>;
 
     fn derivative(

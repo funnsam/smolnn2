@@ -1,5 +1,6 @@
 use crate::*;
 
+/// Computes the squared error (`(result - expected)²`)
 pub fn squared_error<const W: usize, const H: usize>(
     result: Matrix<W, H>,
     expected: &Matrix<W, H>,
@@ -14,6 +15,7 @@ pub fn squared_error_derivative<const W: usize, const H: usize>(
     (result - expected) * 2.0
 }
 
+/// Computes the categorical cross entropy (`-ln(result) × expected`)
 pub fn categorical_cross_entropy<const W: usize, const H: usize>(
     result: Matrix<W, H>,
     expected: &Matrix<W, H>,

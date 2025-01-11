@@ -9,12 +9,14 @@ pub use fcnn_make_optimizers as make_optimizers;
 
 #[derive(Debug, Clone)]
 #[cfg_attr(feature = "serde", derive(serde::Serialize, serde::Deserialize))]
+/// A fully connected layer
 pub struct Fcnn<const I: usize, const O: usize> {
     pub weight: Matrix<I, O>,
     pub bias: Vector<O>,
 }
 
 #[derive(Debug, Clone)]
+/// A weight accumulator for `Fcnn`
 pub struct FcnnCollector<const I: usize, const O: usize> {
     pub weight: Matrix<I, O>,
     pub bias: Vector<O>,
