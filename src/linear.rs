@@ -79,11 +79,12 @@ impl<const I: usize, const O: usize> Collectable for Linear<I, O> where
 
 impl<const I: usize, const O: usize> Layer<Dim2<1, I>, Dim2<1, O>> for Linear<I, O> where
     [f32; 1 * I * O]: Sized,
+    [f32; 1 * O * I]: Sized,
     [f32; 1 * 1 * O]: Sized,
+    [f32; 1 * 1 * I]: Sized,
+    [f32; 1 * I * 1]: Sized,
 {
-    fn forward(&self, input: &Vector<I>) -> Vector<O> where
-        [f32; 1 * 1 * I]: Sized,
-    {
+    fn forward(&self, input: &Vector<I>) -> Vector<O> {
         &self.weight * input + &self.bias
     }
 
@@ -91,10 +92,7 @@ impl<const I: usize, const O: usize> Layer<Dim2<1, I>, Dim2<1, O>> for Linear<I,
         &self,
         dc: &Vector<O>,
         _input: &Vector<I>,
-    ) -> Vector<I> where
-        [f32; 1 * O * I]: Sized,
-        [f32; 1 * 1 * I]: Sized,
-    {
+    ) -> Vector<I> {
         &self.weight.transpose() * dc
     }
 
@@ -103,10 +101,7 @@ impl<const I: usize, const O: usize> Layer<Dim2<1, I>, Dim2<1, O>> for Linear<I,
         collector: &mut Self::Collector,
         last_derivative: Vector<O>,
         input: &Vector<I>,
-    ) where
-        [f32; 1 * 1 * I]: Sized,
-        [f32; 1 * I * 1]: Sized,
-    {
+    ) {
         collector.bias += &last_derivative;
         collector.weight += &(&last_derivative * &input.transpose());
     }

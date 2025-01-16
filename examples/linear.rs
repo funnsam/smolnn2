@@ -1,3 +1,6 @@
+#![allow(incomplete_features)]
+#![feature(generic_const_exprs)]
+
 use smolmatrix::*;
 use smolnn2::*;
 
@@ -8,9 +11,9 @@ fn main() {
         data.push((vector!(1 [x]), gen_data(x)));
     }
 
-    let mut l1 = fcnn::Fcnn::new_xavier_uniform(fastrand::f32);
-    let mut o1 = fcnn::make_optimizers!(adam::Adam::new(0.9, 0.999, 0.01));
-    let mut c1 = fcnn::FcnnCollector::new();
+    let mut l1 = linear::Linear::new_xavier_uniform(fastrand::f32);
+    let mut o1 = linear::make_optimizers!(adam::Adam::new(0.9, 0.999, 0.01));
+    let mut c1 = linear::LinearCollector::new();
 
     loop {
         c1.reset();

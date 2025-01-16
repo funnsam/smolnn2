@@ -16,3 +16,15 @@ fastrand = "2.3.0"
 [features]
 macro = ["dep:smolnn2-macro"]
 serde = ["dep:serde", "smolmatrix/serde"]
+
+[[example]]
+name = "linear_macro"
+required-features = ["macro"]
+
+[[example]]
+name = "simple_macro"
+required-features = ["macro"]
+
+[[example]]
+name = "categorize_macro"
+required-features = ["macro"]
