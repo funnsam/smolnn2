@@ -1,6 +1,9 @@
+#![allow(incomplete_features)]
+#![feature(generic_const_exprs)]
+
 // layers
 pub mod activation;
-pub mod fcnn;
+pub mod linear;
 
 // optimizers
 pub mod adam;
@@ -14,21 +17,21 @@ use smolmatrix::*;
 #[cfg(feature = "macro")]
 pub use smolnn2_macro::model;
 
-pub trait Layer<const IW: usize, const IH: usize, const OW: usize, const OH: usize>: Collectable {
+pub trait Layer<I: Dimension, O: Dimension>: Collectable {
     /// Does forward propagation
-    fn forward(&self, input: &Matrix<IW, IH>) -> Matrix<OW, OH>;
+    fn forward(&self, input: &Tensor<I>) -> Tensor<O>;
 
     fn derivative(
         &self,
-        dc: &Matrix<OW, OH>,
-        input: &Matrix<IW, IH>,
-    ) -> Matrix<IW, IH>;
+        dc: &Tensor<O>,
+        input: &Tensor<I>,
+    ) -> Tensor<I>;
 
     fn back_propagate(
         &self,
         collector: &mut Self::Collector,
-        last_derivative: Matrix<OW, OH>,
-        input: &Matrix<IW, IH>,
+        last_derivative: Tensor<O>,
+        input: &Tensor<I>,
     );
 }
 
@@ -40,12 +43,12 @@ impl<T: Collectable> Collectable for Box<T> {
     type Collector = T::Collector;
 }
 
-pub trait Optimizer<const W: usize, const H: usize> {
-    fn update(&mut self, w: &mut Matrix<W, H>, g: Matrix<W, H>);
+pub trait Optimizer<D: Dimension> {
+    fn update(&mut self, w: &mut Tensor<D>, g: Tensor<D>);
 }
 
-impl<T: Optimizer<W, H>, const W: usize, const H: usize> Optimizer<W, H> for Box<T> {
-    fn update(&mut self, w: &mut Matrix<W, H>, g: Matrix<W, H>) {
+impl<D: Dimension, T: Optimizer<D>> Optimizer<D> for Box<T> {
+    fn update(&mut self, w: &mut Tensor<D>, g: Tensor<D>) {
         (**self).update(w, g);
     }
 }
